@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Seen4Gamers Store</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b0b0b;
+color:white;
+margin:0;
+}
+
+header{
+background:#000;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+header h1{
+margin:0;
+}
+
+nav button{
+margin-left:10px;
+}
+
+button{
+background:#0066ff;
+border:none;
+padding:10px 18px;
+color:white;
+cursor:pointer;
+border-radius:6px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:30px;
+}
+
+.card{
+background:#1a1a1a;
+padding:15px;
+border-radius:10px;
+text-align:center;
+}
+
+.card img{
+width:100%;
+border-radius:8px;
+}
+
+.panel{
+display:none;
+padding:30px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+td,th{
+padding:10px;
+border-bottom:1px solid #444;
+}
+
+input{
+padding:6px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>Seen4Gamers</h1>
+
+<nav>
+<button onclick="showStore()">Store</button>
+<button onclick="showCart()">Cart 🛒</button>
+<button onclick="adminLogin()">Admin</button>
+</nav>
+
+</header>
+
+
+<!-- STORE -->
+
+<div id="store" class="grid"></div>
+
+
+<!-- CART -->
+
+<div id="cartPanel" class="panel">
+
+<h2>Your Cart</h2>
+
+<div id="cart"></div>
+
+<h3 id="total"></h3>
+
+<button onclick="checkout()">Checkout</button>
+
+</div>
+
+
+<!-- ADMIN -->
+
+<div id="adminPanel" class="panel">
+
+<h2>Admin Panel</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>Game</th>
+<th>Price</th>
+<th>Change Price</th>
+<th>Delete</th>
+</tr>
+</thead>
+
+<tbody id="adminTable"></tbody>
+
+</table>
+
+<h3>Add New Game</h3>
+
+<input id="newName" placeholder="Game name">
+<input id="newPrice" placeholder="Price">
+<input id="newImage" placeholder="Image URL">
+
+<button onclick="addGame()">Add Game</button>
+
+</div>
+
+
+
+<script>
+
+/* =========================
+DEFAULT GAMES
+========================= */
+
+let games = JSON.parse(localStorage.getItem("games")) || [
+
+{
+id:1,
+name:"Call Of Duty Black Ops",
+price:1100,
+image:"https://upload.wikimedia.org/wikipedia/en/6/6e/Call_of_Duty_Black_Ops_Cold_War.jpg"
+},
+
+{
+id:2,
+name:"Ghost of Tsushima",
+price:900,
+image:"https://upload.wikimedia.org/wikipedia/en/b/b6/Ghost_of_Tsushima.jpg"
+},
+
+{
+id:3,
+name:"Spiderman",
+price:250,
+image:"https://upload.wikimedia.org/wikipedia/en/4/4f/Spider-Man_PS4_cover.jpg"
+},
+
+{
+id:4,
+name:"FC 24",
+price:560,
+image:"https://upload.wikimedia.org/wikipedia/en/e/ea/EA_Sports_FC_24_cover.jpg"
+},
+
+{
+id:5,
+name:"Red Dead Redemption 2",
+price:200,
+image:"https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
+},
+
+{
+id:6,
+name:"Battlefield",
+price:1000,
+image:"https://upload.wikimedia.org/wikipedia/en/6/6e/Battlefield_2042_cover.jpg"
+},
+
+{
+id:7,
+name:"GTA V",
+price:250,
+image:"https://upload.wikimedia.org/wikipedia/en/a/a5/Grand_Theft_Auto_V.png"
+}
+
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+
+/* =========================
+SAVE DATA
+========================= */
+
+function saveGames(){
+localStorage.setItem("games",JSON.stringify(games));
+}
+
+function saveCart(){
+localStorage.setItem("cart",JSON.stringify(cart));
+}
+
+
+/* =========================
+STORE
+========================= */
+
+function showStore(){
+
+hideAll();
+
+document.getElementById("store").style.display="grid";
+
+renderStore();
+
+}
+
+function renderStore(){
+
+const store=document.getElementById("store");
+
+store.innerHTML="";
+
+games.forEach(g=>{
+
+store.innerHTML+=`
+
+<div class="card">
+
+<img src="${g.image}">
+
+<h3>${g.name}</h3>
+
+<p>${g.price} EGP</p>
+
+<button onclick="addToCart(${g.id})">Add To Cart</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+/* =========================
+CART
+========================= */
+
+function addToCart(id){
+
+const game=games.find(g=>g.id===id);
+
+cart.push(game);
+
+saveCart();
+
+alert("Added to cart");
+
+}
+
+function showCart(){
+
+hideAll();
+
+document.getElementById("cartPanel").style.display="block";
+
+renderCart();
+
+}
+
+function renderCart(){
+
+const container=document.getElementById("cart");
+
+container.innerHTML="";
+
+let total=0;
+
+cart.forEach(g=>{
+
+container.innerHTML+=`<p>${g.name} - ${g.price} EGP</p>`;
+
+total+=Number(g.price);
+
+});
+
+document.getElementById("total").innerText="Total: "+total+" EGP";
+
+}
+
+function checkout(){
+
+alert("Order placed!");
+
+cart=[];
+
+saveCart();
+
+renderCart();
+
+}
+
+
+/* =========================
+ADMIN
+========================= */
+
+function adminLogin(){
+
+let pass=prompt("Enter admin password");
+
+if(pass==="admin123"){
+
+showAdmin();
+
+}else{
+
+alert("Wrong password");
+
+}
+
+}
+
+function showAdmin(){
+
+hideAll();
+
+document.getElementById("adminPanel").style.display="block";
+
+renderAdmin();
+
+}
+
+function renderAdmin(){
+
+const table=document.getElementById("adminTable");
+
+table.innerHTML="";
+
+games.forEach(g=>{
+
+table.innerHTML+=`
+
+<tr>
+
+<td>${g.name}</td>
+
+<td>${g.price}</td>
+
+<td>
+
+<input id="price${g.id}" type="number">
+
+<button onclick="updatePrice(${g.id})">Update</button>
+
+</td>
+
+<td>
+
+<button onclick="deleteGame(${g.id})">Delete</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+
+function updatePrice(id){
+
+const price=document.getElementById("price"+id).value;
+
+const game=games.find(g=>g.id===id);
+
+game.price=price;
+
+saveGames();
+
+renderAdmin();
+
+renderStore();
+
+}
+
+
+function deleteGame(id){
+
+games=games.filter(g=>g.id!==id);
+
+saveGames();
+
+renderAdmin();
+
+renderStore();
+
+}
+
+
+function addGame(){
+
+const name=document.getElementById("newName").value;
+
+const price=document.getElementById("newPrice").value;
+
+const image=document.getElementById("newImage").value;
+
+const id=Date.now();
+
+games.push({id,name,price,image});
+
+saveGames();
+
+renderAdmin();
+
+renderStore();
+
+}
+
+
+/* =========================
+HELPER
+========================= */
+
+function hideAll(){
+
+document.getElementById("store").style.display="none";
+document.getElementById("cartPanel").style.display="none";
+document.getElementById("adminPanel").style.display="none";
+
+}
+
+
+/* START */
+
+showStore();
+
+</script>
+
+</body>
+</html>
